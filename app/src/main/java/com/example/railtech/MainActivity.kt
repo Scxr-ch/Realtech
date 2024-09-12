@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
             RailtechTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
+                        //hi
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
