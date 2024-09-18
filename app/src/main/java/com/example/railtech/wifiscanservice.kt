@@ -34,7 +34,7 @@ class WifiScanService : Service() {
     private fun start() {
         val notification =
             NotificationCompat.Builder(this, "running_channel").setSmallIcon(R.drawable.ic_wifi)
-                .setContentText("Run is active").build()
+                .setContentText("WifiScan is running as a Foreground Service").build()
         startForeground(1, notification)
     }
 

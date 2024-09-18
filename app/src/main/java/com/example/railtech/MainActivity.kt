@@ -136,11 +136,11 @@ fun RssiScreen(wifiManager: WifiManager) {
     // Launch a coroutine to update scan results every few seconds
     LaunchedEffect(Unit) {
         while (true) {
-            wifiManager.startScan()
-            scanResults = getWifiScanResults(wifiManager)
-            //scanResults = scanResults.filter { it.SSID == "NPWirelessx" }
-            println(scanResults)
-            delay(32000L) // Update every 32 seconds
+                wifiManager.startScan()
+                scanResults = getWifiScanResults(wifiManager)
+                //scanResults = scanResults.filter { it.SSID == "NPWirelessx" }
+                println(scanResults)
+                delay(32000L) // Update every 32 seconds
         }
     }
 
@@ -154,7 +154,7 @@ fun RssiScreen(wifiManager: WifiManager) {
     ) {
         items(scanResults){result ->
             val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID
-            Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm, MAC address: ${result.BSSID}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm\nMAC address: ${result.BSSID}, timestamp: ${result.timestamp}", style = MaterialTheme.typography.bodyLarge)
         }
 
     }
