@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
                             startService(it)
                         })}) { Text("Start service again")}
                     }
-                    RssiScreen1(wifiManager)
+                    RssiScreen(wifiManager)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
@@ -130,7 +130,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun RssiScreen1(wifiManager: WifiManager) {
+fun RssiScreen(wifiManager: WifiManager) {
 
     var scanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
     // Launch a coroutine to update scan results every few seconds
@@ -140,7 +140,7 @@ fun RssiScreen1(wifiManager: WifiManager) {
             scanResults = getWifiScanResults(wifiManager)
             //scanResults = scanResults.filter { it.SSID == "NPWirelessx" }
             println(scanResults)
-            delay(32000L) // Update every 10 seconds
+            delay(32000L) // Update every 32 seconds
         }
     }
 
@@ -158,11 +158,6 @@ fun RssiScreen1(wifiManager: WifiManager) {
         }
 
     }
-}
-@Composable
-fun Messagerow(result: ScanResult){
-    val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID
-    Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm, MAC address: ${result.BSSID}", style = MaterialTheme.typography.bodyLarge)
 }
 fun getWifiScanResults(wifiManager: WifiManager): List<ScanResult> {
     return wifiManager.scanResults // List of ScanResults with RSSI and other details
