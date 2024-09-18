@@ -1,48 +1,181 @@
 package com.example.railtech
 
-import android.os.Bundle
+import android.Manifest
+import android.app.Application
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.wifi.ScanResult
+import android.net.wifi.WifiManager
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.example.railtech.ui.theme.RailtechTheme
+import kotlinx.coroutines.delay
+import android.os.Bundle
+
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
+import android.os.Message
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
 import com.example.railtech.ui.theme.RailtechTheme
 
+class RunningApp: Application(){
+    override fun onCreate() {
+        super.onCreate()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "running_channel",
+                "running notification",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+}
 class MainActivity : ComponentActivity() {
+
+    private lateinit var wifiManager: WifiManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                0
+            )
+        }
+        // Initialize WifiManager
+        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+        // Check and request location permission at runtime
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionsLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        // Start the foreground service
+        startService(Intent(applicationContext,WifiScanService::class.java).also{
+            it.action = WifiScanService.Actions.START.toString()
+            startService(it)
+        })
+
+
         setContent {
-            RailtechTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        //hi
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            RailtechTheme() {
+                // Use your RssiScreen here
+                Column(modifier = Modifier.fillMaxSize())// Ensure the column fills the available space
+                {
+                    Row() {
+                        Button(onClick = {
+                            stopService(
+                                Intent(
+                                    applicationContext,
+                                    WifiScanService::class.java
+                                ).also {
+                                    it.action = WifiScanService.Actions.STOP.toString()
+                                    stopService(it)
+                                })
+                        }) { Text("stop service") }
+                        Button(onClick = {startService(Intent(applicationContext,WifiScanService::class.java).also{
+                            it.action = WifiScanService.Actions.START.toString()
+                            startService(it)
+                        })}) { Text("Start service again")}
+                    }
+                    RssiScreen(wifiManager)
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    // Permission request launcher
+    private val requestPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                // Permission granted, start the service
+                startWifiScanService()
+            } else {
+                // Handle permission denial
+            }
+        }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    RailtechTheme {
-        Greeting("Android")
+    // Start the WifiScanService as a foreground service
+    private fun startWifiScanService() {
+        val intent = Intent(this, WifiScanService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
     }
 }
+
+
+@Composable
+fun RssiScreen(wifiManager: WifiManager) {
+
+    var scanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
+    // Launch a coroutine to update scan results every few seconds
+    LaunchedEffect(Unit) {
+        while (true) {
+            wifiManager.startScan()
+            scanResults = getWifiScanResults(wifiManager)
+            //scanResults = scanResults.filter { it.SSID == "NPWirelessx" }
+            println(scanResults)
+            delay(32000L) // Update every 32 seconds
+        }
+    }
+
+    // Display the UI
+    Text(text = "Available Networks", style = MaterialTheme.typography.headlineSmall)
+    LazyColumn(
+        modifier = Modifier
+            .padding(20.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+        items(scanResults){result ->
+            val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID
+            Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm, MAC address: ${result.BSSID}", style = MaterialTheme.typography.bodyLarge)
+        }
+
+    }
+}
+fun getWifiScanResults(wifiManager: WifiManager): List<ScanResult> {
+    return wifiManager.scanResults // List of ScanResults with RSSI and other details
+}
+
+@Suppress("DEPRECATION")
+fun getWifiRssi(wifiManager: WifiManager): Int {
+    return wifiManager.connectionInfo.rssi
+}
+@Suppress("DEPRECATION")
+fun getwifiSsid(wifiManager: WifiManager): String {
+    val ssid = wifiManager.connectionInfo.ssid
+    return if(ssid.isNullOrEmpty()||ssid == "") "Hidden" else ssid
+}
+
+
+
+
+
+
+
