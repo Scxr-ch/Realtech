@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
                             startService(it)
                         })}) { Text("Start service again")}
                     }
-                    RssiScreen1(wifiManager)
+//                    RssiScreen1(wifiManager)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
@@ -126,37 +126,37 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-@Composable
-fun RssiScreen1(wifiManager: WifiManager) {
-
-    var scanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
-    // Launch a coroutine to update scan results every few seconds
-    LaunchedEffect(Unit) {
-        while (true) {
-            wifiManager.startScan()
-            scanResults = getWifiScanResults(wifiManager)
-            //scanResults = scanResults.filter { it.SSID == "NPWirelessx" }
-            println(scanResults)
-            delay(32000L) // Update every 10 seconds
-        }
-    }
-
-    // Display the UI
-    Text(text = "Available Networks", style = MaterialTheme.typography.headlineSmall)
-    LazyColumn(
-        modifier = Modifier
-            .padding(20.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Center
-    ) {
-        items(scanResults){result ->
-            val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID
-            Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm, MAC address: ${result.BSSID}", style = MaterialTheme.typography.bodyLarge)
-        }
-
-    }
-}
+//
+//@Composable
+//fun RssiScreen1(wifiManager: WifiManager) {
+//
+//    var scanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
+//    // Launch a coroutine to update scan results every few seconds
+//    LaunchedEffect(Unit) {
+//        while (true) {
+//            wifiManager.startScan()
+//            scanResults = getWifiScanResults(wifiManager)
+//            //scanResults = scanResults.filter { it.SSID == "NPWirelessx" }
+//            println(scanResults)
+//            delay(32000L) // Update every 10 seconds
+//        }
+//    }
+//
+//    // Display the UI
+//    Text(text = "Available Networks", style = MaterialTheme.typography.headlineSmall)
+//    LazyColumn(
+//        modifier = Modifier
+//            .padding(20.dp),
+//        horizontalAlignment = Alignment.Start,
+//        verticalArrangement = Arrangement.Center
+//    ) {
+//        items(scanResults){result ->
+//            val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID
+//            Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm, MAC address: ${result.BSSID}", style = MaterialTheme.typography.bodyLarge)
+//        }
+//
+//    }
+//}
 @Composable
 fun Messagerow(result: ScanResult){
     val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID

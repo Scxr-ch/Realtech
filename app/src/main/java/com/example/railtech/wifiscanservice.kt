@@ -13,10 +13,16 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.compose.material3.Button
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.PermissionChecker
+import com.example.railtech.models.AccessPoint
+import com.example.railtech.models.WifiScanObject
+import com.example.railtech.network.sendWifiScanData
 import kotlinx.coroutines.*
+
 class WifiScanService : Service() {
     private lateinit var wifiManager: WifiManager
 
@@ -42,17 +48,38 @@ class WifiScanService : Service() {
         START, STOP
     }
 
-//    override fun onCreate() {
-//        super.onCreate()
-//        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-//        CoroutineScope(Dispatchers.IO).launch {
-//            while (true) {
-//                wifiManager.startScan()
-//                val scanResults = wifiManager.scanResults
-//                // Process scan results
-//                println(scanResults)
-//                delay(32000) // Scan every 30 seconds
-//            }
-//        }
-//    }
+    val scope = CoroutineScope(Dispatchers.IO)
+
+    private fun processWifiScanResults(scanResults: List<ScanResult>) {
+        val thingToSend = WifiScanObject(
+            user = "alonzo",
+            accessPoints = List(scanResults.size) { index ->
+                AccessPoint(
+                    bssid = scanResults[index].BSSID,
+                    signalStrength = scanResults[index].level,
+                    frequency = scanResults[index].frequency,
+                    ssid = scanResults[index].SSID,
+                )
+            }
+        )
+        scope.launch {
+            sendWifiScanData(thingToSend)
+        }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        CoroutineScope(Dispatchers.IO).launch {
+            while (true) {
+                wifiManager.startScan()
+                val scanResults = wifiManager.scanResults
+                // Process scan results
+                println(scanResults)
+
+                processWifiScanResults(scanResults)
+                delay(32000) // Scan every 30 seconds
+            }
+        }
+    }
 }
