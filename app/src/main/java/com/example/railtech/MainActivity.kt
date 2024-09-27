@@ -32,8 +32,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.example.railtech.ui.theme.RailtechTheme
-
 class RunningApp: Application(){
     override fun onCreate() {
         super.onCreate()
@@ -99,7 +97,7 @@ class MainActivity : ComponentActivity() {
                             startService(it)
                         })}) { Text("Start service again")}
                     }
-                    RssiScreen(wifiManager)
+                    RssiScreen1(wifiManager)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
@@ -130,17 +128,17 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun RssiScreen(wifiManager: WifiManager) {
+fun RssiScreen1(wifiManager: WifiManager) {
 
     var scanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
     // Launch a coroutine to update scan results every few seconds
     LaunchedEffect(Unit) {
         while (true) {
-                wifiManager.startScan()
-                scanResults = getWifiScanResults(wifiManager)
-                //scanResults = scanResults.filter { it.SSID == "NPWirelessx" }
-                println(scanResults)
-                delay(32000L) // Update every 32 seconds
+            wifiManager.startScan()
+            scanResults = getWifiScanResults(wifiManager)
+            //scanResults = scanResults.filter { it.SSID == "NPWirelessx" }
+            println(scanResults)
+            delay(32000L) // Update every 10 seconds
         }
     }
 
@@ -154,10 +152,15 @@ fun RssiScreen(wifiManager: WifiManager) {
     ) {
         items(scanResults){result ->
             val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID
-            Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm\nMAC address: ${result.BSSID}, timestamp: ${result.timestamp}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm, MAC address: ${result.BSSID}", style = MaterialTheme.typography.bodyLarge)
         }
 
     }
+}
+@Composable
+fun Messagerow(result: ScanResult){
+    val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID
+    Text(text = "SSID: ${ssid}, RSSI: ${result.level} dBm, MAC address: ${result.BSSID}", style = MaterialTheme.typography.bodyLarge)
 }
 fun getWifiScanResults(wifiManager: WifiManager): List<ScanResult> {
     return wifiManager.scanResults // List of ScanResults with RSSI and other details

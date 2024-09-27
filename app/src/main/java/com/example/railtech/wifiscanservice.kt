@@ -42,17 +42,17 @@ class WifiScanService : Service() {
         START, STOP
     }
 
-//    override fun onCreate() {
-//        super.onCreate()
-//        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-//        CoroutineScope(Dispatchers.IO).launch {
-//            while (true) {
-//                wifiManager.startScan()
-//                val scanResults = wifiManager.scanResults
-//                // Process scan results
-//                println(scanResults)
-//                delay(35000) // Scan every 30 seconds
-//            }
-//        }
-//    }
+    override fun onCreate() {
+        super.onCreate()
+        wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        CoroutineScope(Dispatchers.IO).launch {
+            while (true) {
+                wifiManager.startScan()
+                val scanResults = wifiManager.scanResults
+                // Process scan results
+                println(scanResults)
+                delay(32000) // Scan every 30 seconds
+            }
+        }
+    }
 }
