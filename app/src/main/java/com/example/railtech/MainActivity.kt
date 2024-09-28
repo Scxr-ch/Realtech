@@ -32,6 +32,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import com.example.railtech.ui.theme.AppMain
+
 class RunningApp: Application(){
     override fun onCreate() {
         super.onCreate()
@@ -48,7 +50,7 @@ class RunningApp: Application(){
     }
 }
 class MainActivity : ComponentActivity() {
-
+    private var isDarkMode by mutableStateOf(false) // State for dark mode
     private lateinit var wifiManager: WifiManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,31 +79,43 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
-            RailtechTheme() {
-                // Use your RssiScreen here
-                Column(modifier = Modifier.fillMaxSize())// Ensure the column fills the available space
-                {
-                    Row() {
-                        Button(onClick = {
-                            stopService(
-                                Intent(
-                                    applicationContext,
-                                    WifiScanService::class.java
-                                ).also {
-                                    it.action = WifiScanService.Actions.STOP.toString()
-                                    stopService(it)
-                                })
-                        }) { Text("stop service") }
-                        Button(onClick = {startService(Intent(applicationContext,WifiScanService::class.java).also{
-                            it.action = WifiScanService.Actions.START.toString()
-                            startService(it)
-                        })}) { Text("Start service again")}
+            RailtechTheme(darkTheme = isDarkMode) {
+                Scaffold(modifier = Modifier.fillMaxSize()) {
+                    Column(modifier = Modifier.padding(it)) {
+                        AppMain()
+                        // Use your RssiScreen here
+                        Column(modifier = Modifier.fillMaxSize())// Ensure the column fills the available space
+                        {
+                            Row() {
+                                Button(onClick = {
+                                    stopService(
+                                        Intent(
+                                            applicationContext,
+                                            WifiScanService::class.java
+                                        ).also {
+                                            it.action = WifiScanService.Actions.STOP.toString()
+                                            stopService(it)
+                                        })
+                                }) { Text("stop service") }
+                                Button(onClick = {
+                                    startService(
+                                        Intent(
+                                            applicationContext,
+                                            WifiScanService::class.java
+                                        ).also {
+                                            it.action = WifiScanService.Actions.START.toString()
+                                            startService(it)
+                                        })
+                                }) { Text("Start service again") }
+                            }
+//                            RssiScreen1(wifiManager)
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
-//                    RssiScreen1(wifiManager)
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
+
     }
 
     // Permission request launcher
@@ -176,7 +190,13 @@ fun getwifiSsid(wifiManager: WifiManager): String {
     return if(ssid.isNullOrEmpty()||ssid == "") "Hidden" else ssid
 }
 
-
+@Preview(showBackground = true)
+@Composable
+fun login_screenPreview() {
+    RailtechTheme {
+        AppMain()
+    }
+}
 
 
 
