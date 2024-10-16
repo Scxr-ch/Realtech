@@ -1,6 +1,5 @@
-package com.example.railtech.models;
+package com.example.railtech.models
 
-import android.net.wifi.WifiSsid
 
 data class WifiScanObject(
     val user: String,
@@ -13,3 +12,10 @@ data class AccessPoint (
     val signalStrength: Int,
     val frequency: Int
 )
+
+data class StepsInfoObject(
+    val user: String,
+    val directions: List<String>,
+    val steps: Int
+)
+

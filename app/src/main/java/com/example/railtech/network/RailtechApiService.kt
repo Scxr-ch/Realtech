@@ -1,8 +1,8 @@
 package com.example.railtech.network
 
+import com.example.railtech.models.StepsInfoObject
 import com.example.railtech.models.WifiScanObject
 
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -33,6 +33,9 @@ interface RailtechApiService {
     // which you defined in the Retrofit builder—used to start the request.
     @POST("update_wifi_scan")
     suspend fun sendWifiScanData(@Body wifiScanObject: WifiScanObject) : Response<Void>
+
+    @POST("update_steps")
+    suspend fun sendStepsData(@Body stepsInfoObject: StepsInfoObject) : Response<Void>
 
 }
 
