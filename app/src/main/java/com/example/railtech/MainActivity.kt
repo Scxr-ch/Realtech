@@ -28,11 +28,14 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Message
+import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.example.railtech.ui.theme.AppMain
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
 class RunningApp: Application(){
     override fun onCreate() {
@@ -76,7 +79,6 @@ class MainActivity : ComponentActivity() {
             it.action = WifiScanService.Actions.START.toString()
             startService(it)
         })
-
 
         setContent {
             RailtechTheme(darkTheme = isDarkMode) {

@@ -15,7 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+//import com.example.railtech.MainActivity.checkCamPermission
 
 import com.example.railtech.R
 
@@ -234,12 +234,13 @@ fun login_screen(onNavigateToConfirmation: () -> Unit) {
                 Button(
                     onClick = {
                         // QR code scanning logic
-                        val scannedQRCode = "userScannedQRCode" // Replace with actual logic
-                        if (scannedQRCode == "expectedQRCodeValue") {
-                            QRisError = false
-                        } else {
-                            QRisError = true
-                        }
+//                        val scannedQRCode = "userScannedQRCode" // Replace with actual logic
+//                        if (scannedQRCode == "expectedQRCodeValue") {
+//                            QRisError = false
+//                        } else {
+//                            QRisError = true
+//                        }
+                        checkCamPermission(this@MainActivity)
                     },
                     modifier = Modifier
                         .width(300.dp)
