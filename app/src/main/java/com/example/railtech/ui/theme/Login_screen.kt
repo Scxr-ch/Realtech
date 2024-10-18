@@ -1,4 +1,6 @@
 package com.example.railtech.ui.theme
+import android.app.Activity
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 //import com.example.railtech.MainActivity.checkCamPermission
-
+import com.example.railtech.checkCamPermission
 import com.example.railtech.R
 
 @Composable
@@ -167,14 +169,14 @@ fun Orbar() {
     }
 }
 @Composable
-fun AppMain() {
+fun AppMain(context: Context,activity: Activity) {
     var currentScreen by rememberSaveable { mutableStateOf("login_screen") }
 
     // Conditionally render screens based on the currentScreen state
     when (currentScreen) {
         "login_screen" -> login_screen(onNavigateToConfirmation = {
             currentScreen = "confirmation_screen"
-        })
+        }, context = context, activity)
         "confirmation_screen" -> ConfirmationPage(onNavigateToLogin = {
             currentScreen = "login_screen"
         })
@@ -182,7 +184,7 @@ fun AppMain() {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun login_screen(onNavigateToConfirmation: () -> Unit) {
+fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context,activity :Activity) {
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -240,7 +242,7 @@ fun login_screen(onNavigateToConfirmation: () -> Unit) {
 //                        } else {
 //                            QRisError = true
 //                        }
-                        checkCamPermission(this@MainActivity)
+                        checkCamPermission(context = context, activity = activity)
                     },
                     modifier = Modifier
                         .width(300.dp)
@@ -368,11 +370,11 @@ fun ConfirmationPage(onNavigateToLogin: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewApp() {
-    AppMain()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewApp() {
+//    AppMain()
+//}
 @Preview(showBackground = true)
 @Composable
 fun Previewpg() {

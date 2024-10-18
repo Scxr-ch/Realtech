@@ -11,7 +11,7 @@ data class AccessPoint (
     val bssid: String,
     val signalStrength: Int,
     val frequency: Int
-)
+)       
 
 data class StepsInfoObject(
     val user: String,

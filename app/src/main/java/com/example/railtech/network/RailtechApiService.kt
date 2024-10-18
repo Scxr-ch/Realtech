@@ -31,7 +31,7 @@ private val retrofit = Retrofit.Builder()
 interface RailtechApiService {
     // When the getPhotos() method is invoked, Retrofit appends the endpoint photos to the base URL
     // which you defined in the Retrofit builder—used to start the request.
-    @POST("update_wifi_scan")
+    @POST("update-coordinate")
     suspend fun sendWifiScanData(@Body wifiScanObject: WifiScanObject) : Response<Void>
 
     @POST("update_steps")

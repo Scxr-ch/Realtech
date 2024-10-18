@@ -1,6 +1,7 @@
 package com.example.railtech
 
 import android.Manifest
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
@@ -21,7 +22,6 @@ import androidx.core.content.ContextCompat
 import com.example.railtech.ui.theme.RailtechTheme
 import kotlinx.coroutines.delay
 import android.os.Bundle
-
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
     private var isDarkMode by mutableStateOf(false) // State for dark mode
     private lateinit var wifiManager: WifiManager
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -84,40 +85,56 @@ class MainActivity : ComponentActivity() {
             RailtechTheme(darkTheme = isDarkMode) {
                 Scaffold(modifier = Modifier.fillMaxSize()) {
                     Column(modifier = Modifier.padding(it)) {
-                        AppMain()
+                        AppMain(this@MainActivity, this@MainActivity)
                         // Use your RssiScreen here
-                        Column(modifier = Modifier.fillMaxSize())// Ensure the column fills the available space
-                        {
-                            Row() {
-                                Button(onClick = {
-                                    stopService(
-                                        Intent(
-                                            applicationContext,
-                                            WifiScanService::class.java
-                                        ).also {
-                                            it.action = WifiScanService.Actions.STOP.toString()
-                                            stopService(it)
-                                        })
-                                }) { Text("stop service") }
-                                Button(onClick = {
-                                    startService(
-                                        Intent(
-                                            applicationContext,
-                                            WifiScanService::class.java
-                                        ).also {
-                                            it.action = WifiScanService.Actions.START.toString()
-                                            startService(it)
-                                        })
-                                }) { Text("Start service again") }
-                            }
-//                            RssiScreen1(wifiManager)
-                            Spacer(modifier = Modifier.height(16.dp))
+                        Box {
+                            Button(onClick = {
+                                stopService(
+                                    Intent(
+                                        applicationContext,
+                                        WifiScanService::class.java
+                                    ).also {
+                                        it.action = WifiScanService.Actions.STOP.toString()
+                                        stopService(it)
+                                    })
+                            }) { Text("stop service") }
+                            Button(onClick = {
+                                startService(
+                                    Intent(
+                                        applicationContext,
+                                        WifiScanService::class.java
+                                    ).also {
+                                        it.action = WifiScanService.Actions.START.toString()
+                                        startService(it)
+                                    })
+                            }) { Text("Start service again") }
                         }
+//                            RssiScreen1(wifiManager)
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
+
             }
         }
 
+    }
+    fun showCamera() {
+        val options = ScanOptions()
+        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+        options.setPrompt("Scan a QR code")
+        options.setCameraId(0)
+        options.setBeepEnabled(false)
+        options.setOrientationLocked(false)
+
+        qrCodeLauncher.launch(options)
+    }
+    private var textResult =mutableStateOf("")
+    private val qrCodeLauncher = registerForActivityResult(ScanContract()) { result ->
+        if (result.contents == null) {
+            Toast.makeText(this, "Scan canceled", Toast.LENGTH_SHORT).show()
+        } else {
+            textResult.value = result.contents
+        }
     }
 
     // Permission request launcher
@@ -130,7 +147,28 @@ class MainActivity : ComponentActivity() {
                 // Handle permission denial
             }
         }
-
+    private val requestPermissionLauncherCamera = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            showCamera()
+        } else {
+            Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show()
+        }
+    }
+    fun checkCamPermission(context: Context,activity: Activity) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.CAMERA,
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            showCamera()
+        } else if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.CAMERA)) {
+            Toast.makeText(context, "Camera permission is required to scan QR codes", Toast.LENGTH_SHORT).show()
+        } else {
+            requestPermissionLauncherCamera.launch(android.Manifest.permission.CAMERA)
+        }
+    }
     // Start the WifiScanService as a foreground service
     private fun startWifiScanService() {
         val intent = Intent(this, WifiScanService::class.java)
@@ -173,6 +211,7 @@ class MainActivity : ComponentActivity() {
 //
 //    }
 //}
+
 @Composable
 fun Messagerow(result: ScanResult){
     val ssid = if (result.SSID.isNullOrEmpty()) "Hidden Network" else result.SSID
@@ -192,13 +231,13 @@ fun getwifiSsid(wifiManager: WifiManager): String {
     return if(ssid.isNullOrEmpty()||ssid == "") "Hidden" else ssid
 }
 
-@Preview(showBackground = true)
-@Composable
-fun login_screenPreview() {
-    RailtechTheme {
-        AppMain()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun login_screenPreview() {
+//    RailtechTheme {
+//        AppMain()
+//    }
+//}
 
 
 
