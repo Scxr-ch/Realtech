@@ -1,5 +1,6 @@
 package com.example.railtech.network
 
+import com.example.railtech.models.CheckInObject
 import com.example.railtech.models.StepsInfoObject
 import com.example.railtech.models.WifiScanObject
 
@@ -36,6 +37,9 @@ interface RailtechApiService {
 
     @POST("update_steps")
     suspend fun sendStepsData(@Body stepsInfoObject: StepsInfoObject) : Response<Void>
+
+    @POST("check-in")
+    suspend fun sendCheckInData(@Body checkInObject: CheckInObject) : Response<Void>
 
 }
 

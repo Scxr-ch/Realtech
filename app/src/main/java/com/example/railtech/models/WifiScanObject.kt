@@ -19,3 +19,10 @@ data class StepsInfoObject(
     val steps: Int
 )
 
+data class CheckInObject(
+    val user: String,
+    val checkIn: Boolean,
+    val sessionID: String
+)
+
+
