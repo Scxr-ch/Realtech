@@ -147,28 +147,28 @@ class MainActivity : ComponentActivity() {
                 // Handle permission denial
             }
         }
-    private val requestPermissionLauncherCamera = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            showCamera()
-        } else {
-            Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show()
-        }
-    }
-    fun checkCamPermission(context: Context,activity: Activity) {
-        if (ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.CAMERA,
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            showCamera()
-        } else if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.CAMERA)) {
-            Toast.makeText(context, "Camera permission is required to scan QR codes", Toast.LENGTH_SHORT).show()
-        } else {
-            requestPermissionLauncherCamera.launch(android.Manifest.permission.CAMERA)
-        }
-    }
+//    private val requestPermissionLauncherCamera = registerForActivityResult(
+//        ActivityResultContracts.RequestPermission()
+//    ) { isGranted: Boolean ->
+//        if (isGranted) {
+//            showCamera()
+//        } else {
+//            Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+//    fun checkCamPermission(context: Context,activity: Activity) {
+//        if (ContextCompat.checkSelfPermission(
+//                context,
+//                android.Manifest.permission.CAMERA,
+//            ) == PackageManager.PERMISSION_GRANTED
+//        ) {
+//            showCamera()
+//        } else if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.CAMERA)) {
+//            Toast.makeText(context, "Camera permission is required to scan QR codes", Toast.LENGTH_SHORT).show()
+//        } else {
+//            requestPermissionLauncherCamera.launch(android.Manifest.permission.CAMERA)
+//        }
+//    }
     // Start the WifiScanService as a foreground service
     private fun startWifiScanService() {
         val intent = Intent(this, WifiScanService::class.java)

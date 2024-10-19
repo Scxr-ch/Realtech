@@ -1,6 +1,10 @@
 package com.example.railtech.ui.theme
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,15 +15,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 //import com.example.railtech.MainActivity.checkCamPermission
-import com.example.railtech.checkCamPermission
+//import com.example.railtech.checkCamPermission
 import com.example.railtech.R
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
 @Composable
 fun Navbar() {
@@ -185,6 +194,110 @@ fun AppMain(context: Context,activity: Activity) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context,activity :Activity) {
+//    // Isaacs functions
+//    val textResult = rememberSaveable { mutableStateOf("") }
+//
+//    val qrCodeLauncher = registerForActivityResult(ScanContract()) { result ->
+//        if (result.contents == null) {
+//            Toast.makeText(this, "Scan canceled", Toast.LENGTH_SHORT).show()
+//        } else {
+//            textResult.value = result.contents
+//        }
+//    }
+//
+//    fun showCamera() {
+//        val options = ScanOptions()
+//        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+//        options.setPrompt("Scan a QR code")
+//        options.setCameraId(0)
+//        options.setBeepEnabled(false)
+//        options.setOrientationLocked(false)
+//
+//        qrCodeLauncher.launch(options)
+//    }
+//
+//    private val requestPermissionLauncherCamera = registerForActivityResult(
+//        ActivityResultContracts.RequestPermission()
+//    ) { isGranted: Boolean ->
+//        if (isGranted) {
+//            showCamera()
+//        } else {
+//            Toast.makeText(this, "Camera permission is required", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+//
+//    fun checkCamPermission(context: Context,activity: Activity) {
+//        if (ContextCompat.checkSelfPermission(
+//                context,
+//                android.Manifest.permission.CAMERA,
+//            ) == PackageManager.PERMISSION_GRANTED
+//        ) {
+//            showCamera()
+//        } else if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.CAMERA)) {
+//            Toast.makeText(context, "Camera permission is required to scan QR codes", Toast.LENGTH_SHORT).show()
+//        } else {
+//            ActivityCompat.requestPermissions(activity, arrayOf(android.Manifest.permission.CAMERA),101)
+//        }
+//    }
+
+    // State to store the scan result
+    val textResult = rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
+
+    // Remember the QR code scanner launcher
+    val qrCodeLauncher = rememberLauncherForActivityResult(
+        contract = ScanContract()
+    ) { result ->
+        if (result.contents == null) {
+            Toast.makeText(context, "Scan canceled", Toast.LENGTH_SHORT).show()
+        } else {
+            textResult.value = result.contents
+        }
+    }
+
+    // Function to launch the QR code scanner
+    fun showCamera() {
+        val options = ScanOptions().apply {
+            setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+            setPrompt("Scan a QR code")
+            setCameraId(0)
+            setBeepEnabled(false)
+            setOrientationLocked(false)
+        }
+        qrCodeLauncher.launch(options)
+    }
+
+    // Remember the camera permission launcher
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            showCamera()
+        } else {
+            Toast.makeText(context, "Camera permission is required", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Function to check for camera permission and request if not granted
+    fun checkCamPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                showCamera()
+            }
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                context as Activity,
+                android.Manifest.permission.CAMERA
+            ) -> {
+                Toast.makeText(context, "Camera permission is required to scan QR codes", Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+            }
+        }
+    }
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -242,7 +355,9 @@ fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context,activity
 //                        } else {
 //                            QRisError = true
 //                        }
-                        checkCamPermission(context = context, activity = activity)
+//                        checkCamPermission(context = context, activity = activity)
+                        checkCamPermission()
+
                     },
                     modifier = Modifier
                         .width(300.dp)
