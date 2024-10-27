@@ -24,6 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.railtech.CheckoutScreen
+import com.example.railtech.MainActivity
+import com.example.railtech.MapScreen
 //import com.example.railtech.MainActivity.checkCamPermission
 //import com.example.railtech.checkCamPermission
 import com.example.railtech.R
@@ -36,43 +39,49 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
+fun NavbarComposable() {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()  // Ensures padding for system navigation bar
+            .background(MaterialTheme.colorScheme.surfaceVariant)  // Extend background to the bottom
+    ) {
+        NavigationBarItem(
+            icon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.map),
+                    contentDescription = null
+                )
+            },
+            label = {
+                Text(text = "Map")
+            },
+            selected = true,
+            onClick = {}
+        )
+        NavigationBarItem(
+            icon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.baseline_person_24),
+                    contentDescription = null
+                )
+            },
+            label = {
+                Text(text = "Profile")
+            },
+            selected = false,
+            onClick = {}
+        )
+    }
+}
+
+
+@Composable
 fun Navbar() {
     Scaffold(
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()  // Ensures padding for system navigation bar
-                    .background(MaterialTheme.colorScheme.surfaceVariant)  // Extend background to the bottom
-            ) {
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.map),
-                            contentDescription = null
-                        )
-                    },
-                    label = {
-                        Text(text = "Map")
-                    },
-                    selected = true,
-                    onClick = {}
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.baseline_person_24),
-                            contentDescription = null
-                        )
-                    },
-                    label = {
-                        Text(text = "Profile")
-                    },
-                    selected = false,
-                    onClick = {}
-                )
-            }
+            NavbarComposable()
         }
     ) { paddingValues ->
         Box(
@@ -192,8 +201,16 @@ fun AppMain(context: Context,activity: Activity) {
             currentScreen = "confirmation_screen"
         }, context = context, activity)
         "confirmation_screen" -> ConfirmationPage(onNavigateToLogin = {
-            currentScreen = "login_screen"
+            // insert some logic to start location service
+            currentScreen = "homepage"
         })
+        "homepage" -> MapScreen(onNavigateToCheckout = {
+            currentScreen = "checkout_screen"
+        })
+        "checkout_screen" -> {
+            // insert some logic to end location service
+            CheckoutScreen()
+        }
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -437,7 +454,9 @@ fun ConfirmationPage(onNavigateToLogin: () -> Unit) {
                 text = "You may now go to your work zone and carry out the work required.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(10.dp).padding(50.dp, 0.dp)
+                modifier = Modifier
+                    .padding(10.dp)
+                    .padding(50.dp, 0.dp)
             )
             Button(
                 onClick = { onNavigateToLogin() }, // Navigate back to homepage
@@ -453,13 +472,13 @@ fun ConfirmationPage(onNavigateToLogin: () -> Unit) {
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewApp() {
-//    AppMain()
-//}
 @Preview(showBackground = true)
 @Composable
-fun Previewpg() {
-    ConfirmationPage {  }
+fun PreviewApp() {
+    login_screen(context = LocalContext.current, activity = MainActivity(), onNavigateToConfirmation = {})
 }
+//@Preview(showBackground = true)
+//@Composable
+//fun Previewpg() {
+//    ConfirmationPage {  }
+//}
