@@ -36,13 +36,11 @@ fun CheckoutScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.exits_foreground),
+                painter = painterResource(id = R.drawable.check),
                 contentDescription = null,
-                modifier = Modifier.size(400.dp)
-
-
+                modifier = Modifier.size(200.dp)
             )
-            //Spacer(modifier = Modifier.padding(10.dp))
+            Spacer(modifier = Modifier.padding(10.dp))
             Text(
                 text = "Check out confirmed",
                 style = MaterialTheme.typography.titleLarge,

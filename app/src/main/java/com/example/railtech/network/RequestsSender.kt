@@ -13,6 +13,8 @@ suspend fun sendWifiScanData(wifiScanObject: WifiScanObject) {
 
         if (response.isSuccessful) {
             println("POST request successful: ${response.code()}")
+            val responseBody = response.body()
+            
         } else {
             println("Error: ${response.code()}")
         }

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.railtech.CheckoutScreen
+import com.example.railtech.GPSScreen
 import com.example.railtech.MainActivity
 import com.example.railtech.MapScreen
 //import com.example.railtech.MainActivity.checkCamPermission
@@ -39,7 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun NavbarComposable() {
+fun NavbarComposable(onClickMap: () -> Unit, onClickGPS: () -> Unit, selectMap: Boolean, selectGPS: Boolean) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         modifier = Modifier
@@ -57,8 +58,8 @@ fun NavbarComposable() {
             label = {
                 Text(text = "Map")
             },
-            selected = true,
-            onClick = {}
+            selected = selectMap,
+            onClick = onClickMap
         )
         NavigationBarItem(
             icon = {
@@ -68,31 +69,31 @@ fun NavbarComposable() {
                 )
             },
             label = {
-                Text(text = "Profile")
+                Text(text = "GPS")
             },
-            selected = false,
-            onClick = {}
+            selected = selectGPS,
+            onClick = onClickGPS
         )
     }
 }
 
 
-@Composable
-fun Navbar() {
-    Scaffold(
-        bottomBar = {
-            NavbarComposable()
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues) // Apply padding from the Scaffold
-        ) {
-            // Your screen content here
-        }
-    }
-}
+//@Composable
+//fun Navbar() {
+//    Scaffold(
+//        bottomBar = {
+//            NavbarComposable()
+//        }
+//    ) { paddingValues ->
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(paddingValues) // Apply padding from the Scaffold
+//        ) {
+//            // Your screen content here
+//        }
+//    }
+//}
 
 @Composable
 fun SubmitButton(onClick: () -> Unit) {
@@ -204,12 +205,19 @@ fun AppMain(context: Context,activity: Activity) {
             // insert some logic to start location service
             currentScreen = "homepage"
         })
-        "homepage" -> MapScreen(onNavigateToCheckout = {
-            currentScreen = "checkout_screen"
-        })
+        "homepage" -> MapScreen(
+            onNavigateToCheckout = {
+                currentScreen = "checkout_screen"
+            },
+            onClickMap = { },
+            onClickGPS = { currentScreen = "gps_screen" }
+        )
         "checkout_screen" -> {
             // insert some logic to end location service
             CheckoutScreen()
+        }
+        "gps_screen" -> {
+            GPSScreen()
         }
     }
 }
@@ -420,7 +428,7 @@ fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context, activit
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Navbar()
+//                Navbar()
             }
         }
     }

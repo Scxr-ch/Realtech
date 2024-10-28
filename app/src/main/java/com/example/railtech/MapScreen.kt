@@ -1,5 +1,6 @@
 package com.example.railtech
 
+import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,20 +37,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.railtech.ui.theme.Navbar
+import androidx.core.text.color
+import com.example.railtech.models.AccessPoint
+import com.example.railtech.models.Circle
+import com.example.railtech.models.Coordinates
+import com.example.railtech.models.Person
+import com.example.railtech.models.WorkzoneRectangle
 import com.example.railtech.ui.theme.NavbarComposable
 
 @Composable
-fun MapScreen(onNavigateToCheckout: () -> Unit) {
+fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickGPS: () -> Unit) {
     Scaffold(
         bottomBar = {
-            NavbarComposable()
+            NavbarComposable(
+                onClickMap = onClickMap,
+                onClickGPS = onClickGPS,
+                selectMap = true,
+                selectGPS = false
+            )
         }
     ) { paddingValues ->
         Surface(
@@ -58,7 +70,6 @@ fun MapScreen(onNavigateToCheckout: () -> Unit) {
                 .padding(paddingValues),
             color = MaterialTheme.colorScheme.background
         ) {
-//            GridCanvas(modifier = Modifier.size(200.dp).background(Color.LightGray))
 
             Column(
                 modifier = Modifier
@@ -66,13 +77,36 @@ fun MapScreen(onNavigateToCheckout: () -> Unit) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Apply background color to check if canvas is visible
-                val points = listOf(
-                    Pair(2, 2),
-                    Pair(5, 5),
-                    Pair(8, 3)
+
+                val accessPoints1 = listOf(
+                    AccessPoint("SSID_1", "BSSID_1", -50, 2400),
+                    AccessPoint("SSID_2", "BSSID_2", -70, 5200)
                 )
-                GridCanvas(gridPoints = points, modifier = Modifier.size(200.dp).background(Color.LightGray))
+
+                val accessPoints2 = listOf(
+                    AccessPoint("SSID_3", "BSSID_3", -65, 2400),
+                    AccessPoint("SSID_4", "BSSID_4", -80, 5200)
+                )
+
+                // Generate dummy Circles for current and previous coordinates
+                val circle1 = Circle(10.0f, 20.0f, 5.0f)
+                val circle2 = Circle(15.0f, 25.0f, 4.0f)
+
+                // Create a list of Persons with dummy data
+                val persons = listOf(
+                    Person(circle1, circle2, "Alice", 5.0f, accessPoints1, tracking = true),
+                    Person(circle1, circle2, "Bob", 6.0f, accessPoints2, tracking = false),
+                    Person(Circle(20.0f, 30.0f, 3.0f), Circle(22.0f, 32.0f, 3.5f), "Charlie", 4.5f, accessPoints1, tracking = true),
+                    Person(Circle(25.0f, 35.0f, 2.5f), Circle(26.0f, 36.0f, 2.0f), "Dana", 3.5f, accessPoints2, tracking = false),
+                    Person(Circle(30.0f, 40.0f, 5.5f), Circle(28.0f, 38.0f, 4.5f), "Eve", 5.0f, accessPoints1, tracking = true)
+                )
+
+                val rectangles = listOf(
+                    WorkzoneRectangle("Workzone A", rectLeftX = 5f, rectBottomY = 13f, rectWidth = 2f, rectHeight = 2f),
+                    WorkzoneRectangle("Workzone B", rectLeftX = 2f, rectBottomY = 4f, rectWidth = 2f, rectHeight = 1f)
+                )
+
+                GridCanvas(people = persons, rectangles = rectangles,)
                 ElevatedButton(onClick = onNavigateToCheckout) {
                     Text(
                         text = "Check out",
@@ -89,127 +123,188 @@ fun MapScreen(onNavigateToCheckout: () -> Unit) {
 
 @Composable
 fun GridCanvas(
-    modifier: Modifier = Modifier,
-    gridSize: Dp = 20.dp,
-    gridPoints: List<Pair<Int, Int>> = emptyList(),
+//    modifier: Modifier = Modifier,
+    gridSize: Dp = 25.dp,
+    rectangles: List<WorkzoneRectangle> = emptyList(),
     pointColor: Color = Color.Red,
-    canvasWidth: Dp = 350.dp,
-    canvasHeight: Dp = 700.dp,
-    pointRadius: Float = 5f
+    minX: Int = -7,
+    maxX: Int = 7,
+    minY: Int = 0,
+    maxY: Int = 25,
+    people: List<Person> = emptyList(),
+    pointRadius: Float = 10f
 ) {
+// Calculate the number of cells based on the coordinate range
+    val numSquaresX = maxX - minX
+    val numSquaresY = maxY - minY
+
+    // Calculate canvas width and height based on the number of cells and grid size
+    val canvasWidth = gridSize * numSquaresX
+    val canvasHeight = gridSize * numSquaresY
+
+//    Box(modifier = Modifier.size(canvasWidth.toDp(), canvasHeight.toDp())) {
     Box(modifier = Modifier.size(canvasWidth, canvasHeight)) {
         Canvas(modifier = Modifier.matchParentSize()) {
             val cellSize = gridSize.toPx()
-            drawGrid(gridSize = cellSize, color = Color.Gray)
-            drawGridPoints(gridPoints, cellSize, color = pointColor, radius = pointRadius)
+            val centerX = maxX * cellSize // Offset to align `minX` at the left of the canvas
+            val centerY = maxY * cellSize // Offset to align `minY` at the bottom of the canvas
+
+            // Draw grid with the specified min/max range
+            drawGraphGrid(cellSize, color = Color.LightGray, minX, maxX, minY, maxY, centerX, centerY)
+            drawRectangles(rectangles, cellSize, rectColor = Color(0x80ADD8E6), centerX = centerX, centerY = centerY)
+            drawPeoplePoints(people, cellSize, color = pointColor, radius = pointRadius, centerX = centerX, centerY = centerY)
+            drawAxesLabels(cellSize, minX, maxX, minY, maxY, centerX, centerY)
         }
     }
 }
 
-fun DrawScope.drawGrid(gridSize: Float, color: Color) {
-    val width = size.width
-    val height = size.height
-
-    for (x in 0..(width / gridSize).toInt()) {
-        val startX = x * gridSize
-        drawLine(
-            color = color,
-            start = Offset(startX, 0f),
-            end = Offset(startX, height)
-        )
+fun DrawScope.drawRectangles(
+    rectangles: List<WorkzoneRectangle>,
+    cellSize: Float,
+    rectColor: Color,
+    labelColor: Int = android.graphics.Color.BLACK,
+    centerX: Float = 0f,
+    centerY: Float = 0f
+) {
+    // Configure paint for text labels
+    val textPaint = Paint().apply {
+        color = labelColor
+        textSize = cellSize / 2
+        isAntiAlias = true
     }
 
-    for (y in 0..(height / gridSize).toInt()) {
-        val startY = y * gridSize
-        drawLine(
-            color = color,
-            start = Offset(0f, startY),
-            end = Offset(width, startY)
+    // Draw each rectangle and its label
+    rectangles.forEach { rect ->
+        // Calculate the rectangle’s top-left position in pixels based on cell size and grid offset
+        val topLeft = Offset(
+            x = centerX + rect.rectLeftX * cellSize,
+            y = centerY - (rect.rectBottomY + rect.rectHeight) * cellSize
+        )
+
+        // Define the rectangle's size in pixels
+        val size = androidx.compose.ui.geometry.Size(
+            width = rect.rectWidth * cellSize,
+            height = rect.rectHeight * cellSize
+        )
+
+        // Draw the rectangle with specified color
+        drawRect(
+            color = rectColor,
+            topLeft = topLeft,
+            size = size
+        )
+
+        // Draw the label centered near the rectangle
+        drawContext.canvas.nativeCanvas.drawText(
+            rect.label,
+            topLeft.x + size.width / 2 - textPaint.textSize / 4,
+            topLeft.y + size.height / 2 + textPaint.textSize / 4,
+            textPaint
         )
     }
 }
 
-fun DrawScope.drawGridPoints(
-    gridPoints: List<Pair<Int, Int>>,
+
+fun DrawScope.drawGraphGrid(
     cellSize: Float,
     color: Color,
-    radius: Float
+    minX: Int,
+    maxX: Int,
+    minY: Int,
+    maxY: Int,
+    centerX: Float,
+    centerY: Float
 ) {
-    gridPoints.forEach { (x, y) ->
-        val pixelOffset = Offset(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2)
+    // Draw vertical lines for the x-axis grid
+    for (x in minX..maxX) {
+        val startX = centerX + x * cellSize
+        drawLine(
+            color = color,
+            start = Offset(startX, 0f),
+            end = Offset(startX, size.height),
+            strokeWidth = 3f
+        )
+    }
+
+    // Draw horizontal lines for the y-axis grid
+    for (y in minY..maxY) {
+        val startY = centerY - (y * cellSize) // Invert y coordinate for drawing
+        drawLine(
+            color = color,
+            start = Offset(0f, startY),
+            end = Offset(size.width, startY),
+            strokeWidth = 3f
+        )
+    }
+}
+
+
+fun DrawScope.drawAxesLabels(cellSize: Float, minX: Int, maxX: Int, minY: Int, maxY: Int, centerX: Float, centerY: Float) {
+    val paint = Paint().apply {
+        color = android.graphics.Color.BLACK
+        textSize = cellSize / 2
+    }
+
+    val width = size.width
+    val height = size.height
+
+    // Draw x-axis labels
+    for (x in minX..maxX) {
+        val label = x.toString()
+        val xOffset = centerX + (x * cellSize) + cellSize / 4 // Offset to center label
+        drawContext.canvas.nativeCanvas.drawText(label, xOffset, height - (cellSize / 4), paint) // Positioning near bottom
+    }
+
+    // Draw y-axis labels
+    for (y in minY..maxY) {
+        val label = y.toString()
+        val yOffset = centerY - (y * cellSize) + cellSize / 4 // Inverted for proper positioning
+        drawContext.canvas.nativeCanvas.drawText(label, cellSize / 4, yOffset, paint) // Positioning near left
+    }
+}
+
+fun DrawScope.drawPeoplePoints(
+    people: List<Person>,
+    cellSize: Float,
+    color: Color,
+    radius: Float,
+    centerX: Float,
+    centerY: Float
+) {
+    val paint = Paint().apply {
+        textSize = cellSize / 2
+    }
+    paint.color = android.graphics.Color.BLACK
+
+//    val centerX = size.width / 2
+//    val centerY = size.height / 2
+
+    people.forEach { person ->
+        val (x, y) = person.current_coordinates
+
+        // Calculate the pixel position on the Cartesian plane
+        val pixelOffset = Offset(centerX + x * cellSize, centerY - y * cellSize) // Invert y-axis
+
+        // Draw the point
         drawCircle(
             color = color,
             radius = radius,
             center = pixelOffset
         )
+
+        // Draw the label slightly offset from the point
+        drawContext.canvas.nativeCanvas.drawText(
+            person.name,
+            pixelOffset.x + radius * 2,
+            pixelOffset.y - radius * 2,
+            paint
+        )
     }
 }
-
-//
-//@Composable
-//fun GridCanvas(gridSize: Dp = 20.dp,
-//               canvasWidth: Dp = 350.dp,
-//               canvasHeight: Dp = 700.dp,
-//               gridPoints: List<Pair<Int, Int>> = emptyList(),
-//               pointColor: Color = Color.Red,
-//               pointRadius: Float = 10f,
-//               modifier: Modifier) {
-//    Box {
-//        Canvas(modifier = modifier) {
-//            val cellSize = gridSize.toPx()
-//            drawGrid(gridSize = cellSize, color = Color.Gray)
-//            drawGridPoints(gridPoints, cellSize, color = pointColor, radius = pointRadius)
-//        }
-//    }
-//
-//
-//}
-//
-//fun DrawScope.drawGrid(gridSize: Float, color: Color) {
-//    val width = size.width
-//    val height = size.height
-//
-//    for (x in 0..(width / gridSize).toInt()) {
-//        val startX = x * gridSize
-//        drawLine(
-//            color = color,
-//            start = Offset(startX, 0f),
-//            end = Offset(startX, height)
-//        )
-//    }
-//
-//    for (y in 0..(height / gridSize).toInt()) {
-//        val startY = y * gridSize
-//        drawLine(
-//            color = color,
-//            start = Offset(0f, startY),
-//            end = Offset(width, startY)
-//        )
-//    }
-//}
-//
-//fun DrawScope.drawGridPoints(
-//    gridPoints: List<Pair<Int, Int>>,
-//    cellSize: Float,
-//    color: Color,
-//    radius: Float
-//) {
-//    gridPoints.forEach { (x, y) ->
-//        val pixelOffset = Offset(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2)
-//        drawCircle(
-//            color = color,
-//            radius = radius,
-//            center = pixelOffset
-//        )
-//    }
-//}
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewMapScreen() {
-    MapScreen(onNavigateToCheckout = {})
+    MapScreen(onNavigateToCheckout = {}, onClickMap = {}, onClickGPS = {})
 }
 
 

@@ -3,6 +3,7 @@ package com.example.railtech.network
 import com.example.railtech.models.CheckInObject
 import com.example.railtech.models.StepsInfoObject
 import com.example.railtech.models.WifiScanObject
+import com.example.railtech.models.WifiScanResponse
 
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -33,7 +34,7 @@ interface RailtechApiService {
     // When the getPhotos() method is invoked, Retrofit appends the endpoint photos to the base URL
     // which you defined in the Retrofit builder—used to start the request.
     @POST("update-coordinate")
-    suspend fun sendWifiScanData(@Body wifiScanObject: WifiScanObject) : Response<Void>
+    suspend fun sendWifiScanData(@Body wifiScanObject: WifiScanObject) : Response<WifiScanResponse>
 
     @POST("update_steps")
     suspend fun sendStepsData(@Body stepsInfoObject: StepsInfoObject) : Response<Void>
