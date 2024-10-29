@@ -248,6 +248,7 @@ fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context, activit
             scope.launch {
                 sendCheckInData(checkInData)
             }
+            onNavigateToConfirmation()
         }
     }
 
