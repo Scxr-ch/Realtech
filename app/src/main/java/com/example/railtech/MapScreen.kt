@@ -89,16 +89,16 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
                 )
 
                 // Generate dummy Circles for current and previous coordinates
-                val circle1 = Circle(10.0f, 20.0f, 5.0f)
-                val circle2 = Circle(15.0f, 25.0f, 4.0f)
+                val circle1 = Circle(-6.0f, 23.0f, 5.0f)
+                val circle2 = Circle(1f, 15.0f, 4.0f)
 
                 // Create a list of Persons with dummy data
                 val persons = listOf(
                     Person(circle1, circle2, "Alice", 5.0f, accessPoints1, tracking = true),
-                    Person(circle1, circle2, "Bob", 6.0f, accessPoints2, tracking = false),
-                    Person(Circle(20.0f, 30.0f, 3.0f), Circle(22.0f, 32.0f, 3.5f), "Charlie", 4.5f, accessPoints1, tracking = true),
-                    Person(Circle(25.0f, 35.0f, 2.5f), Circle(26.0f, 36.0f, 2.0f), "Dana", 3.5f, accessPoints2, tracking = false),
-                    Person(Circle(30.0f, 40.0f, 5.5f), Circle(28.0f, 38.0f, 4.5f), "Eve", 5.0f, accessPoints1, tracking = true)
+                    Person(circle2, circle2, "Bob", 4.0f, accessPoints2, tracking = false),
+                    Person(Circle(7.0f, 10.0f, 3.0f), Circle(22.0f, 32.0f, 3.5f), "Charlie", 4.5f, accessPoints1, tracking = true),
+                    Person(Circle(1.0f, 3.0f, 2.5f), Circle(26.0f, 36.0f, 2.0f), "Dana", 3.5f, accessPoints2, tracking = false),
+                    Person(Circle(3.0f, 10.0f, 5.5f), Circle(28.0f, 38.0f, 4.5f), "Eve", 5.0f, accessPoints1, tracking = true)
                 )
 
                 val rectangles = listOf(
@@ -152,7 +152,7 @@ fun GridCanvas(
             // Draw grid with the specified min/max range
             drawGraphGrid(cellSize, color = Color.LightGray, minX, maxX, minY, maxY, centerX, centerY)
             drawRectangles(rectangles, cellSize, rectColor = Color(0x80ADD8E6), centerX = centerX, centerY = centerY)
-            drawPeoplePoints(people, cellSize, color = pointColor, radius = pointRadius, centerX = centerX, centerY = centerY)
+            drawPeoplePoints(people, cellSize, color = pointColor, radius = pointRadius, minX, maxX, minY, maxY)
             drawAxesLabels(cellSize, minX, maxX, minY, maxY, centerX, centerY)
         }
     }
@@ -268,9 +268,42 @@ fun DrawScope.drawPeoplePoints(
     cellSize: Float,
     color: Color,
     radius: Float,
-    centerX: Float,
-    centerY: Float
+    minX: Int,
+    maxX: Int,
+    minY: Int,
+    maxY: Int
 ) {
+    // Calculate the center offset based on min and max values
+    val centerX = -minX * cellSize // Shifts origin for x-axis
+    val centerY = size.height + (minY * cellSize) // Shifts origin for y-axis
+
+    val paint = Paint().apply {
+        textSize = cellSize / 2
+    }
+    paint.color = android.graphics.Color.BLACK
+
+    people.forEach { person ->
+        val (x, y) = person.current_coordinates
+
+        // Convert coordinates to canvas pixel offsets
+        val pixelOffset = Offset(centerX + x * cellSize, centerY - y * cellSize)
+
+        // Draw the point
+        drawCircle(
+            color = color,
+            radius = radius,
+            center = pixelOffset
+        )
+
+        // Draw the label slightly offset from the point
+        drawContext.canvas.nativeCanvas.drawText(
+            person.name,
+            pixelOffset.x + radius * 2,
+            pixelOffset.y - radius * 2,
+            paint
+        )
+    }
+    /*
     val paint = Paint().apply {
         textSize = cellSize / 2
     }
@@ -280,7 +313,9 @@ fun DrawScope.drawPeoplePoints(
 //    val centerY = size.height / 2
 
     people.forEach { person ->
-        val (x, y) = person.current_coordinates
+//        val (x, y) = person.current_coordinates
+        val x = person.current_coordinates.x
+        val y = person.current_coordinates.y
 
         // Calculate the pixel position on the Cartesian plane
         val pixelOffset = Offset(centerX + x * cellSize, centerY - y * cellSize) // Invert y-axis
@@ -300,6 +335,8 @@ fun DrawScope.drawPeoplePoints(
             paint
         )
     }
+    */
+
 }
 @Preview(showBackground = true)
 @Composable
