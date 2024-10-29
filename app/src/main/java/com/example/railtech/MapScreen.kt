@@ -89,7 +89,7 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
                 )
 
                 // Generate dummy Circles for current and previous coordinates
-                val circle1 = Circle(-6.0f, 23.0f, 5.0f)
+                val circle1 = Circle(-6.0f, 19.0f, 5.0f)
                 val circle2 = Circle(1f, 15.0f, 4.0f)
 
                 // Create a list of Persons with dummy data
@@ -130,7 +130,7 @@ fun GridCanvas(
     minX: Int = -7,
     maxX: Int = 7,
     minY: Int = 0,
-    maxY: Int = 25,
+    maxY: Int = 20,
     people: List<Person> = emptyList(),
     pointRadius: Float = 10f
 ) {

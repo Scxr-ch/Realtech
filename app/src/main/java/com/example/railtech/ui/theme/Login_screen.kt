@@ -218,7 +218,7 @@ fun AppMain(context: Context,activity: Activity) {
         }
         "gps_screen" -> {
             GPSScreen(
-                onClickMap = { currentScreen= "checkout_screen" },
+                onClickMap = { currentScreen = "homepage" },
                 onClickGPS = {}
             )
         }
