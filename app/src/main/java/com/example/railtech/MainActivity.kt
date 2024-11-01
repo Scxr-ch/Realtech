@@ -118,25 +118,25 @@ class MainActivity : ComponentActivity() {
         }
 
     }
-    fun showCamera() {
-        val options = ScanOptions()
-        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-        options.setPrompt("Scan a QR code")
-        options.setCameraId(0)
-        options.setBeepEnabled(false)
-        options.setOrientationLocked(false)
-
-        qrCodeLauncher.launch(options)
-    }
-    private var textResult =mutableStateOf("")
-    private val qrCodeLauncher = registerForActivityResult(ScanContract()) { result ->
-        if (result.contents == null) {
-            Toast.makeText(this, "Scan canceled", Toast.LENGTH_SHORT).show()
-        } else {
-            textResult.value = result.contents
-        }
-    }
-
+//    fun showCamera() {
+//        val options = ScanOptions()
+//        options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+//        options.setPrompt("Scan a QR code")
+//        options.setCameraId(0)
+//        options.setBeepEnabled(false)
+//        options.setOrientationLocked(false)
+//
+//        qrCodeLauncher.launch(options)
+//    }
+//    private var textResult =mutableStateOf("")
+//    private val qrCodeLauncher = registerForActivityResult(ScanContract()) { result ->
+//        if (result.contents == null) {
+//            Toast.makeText(this, "Scan canceled", Toast.LENGTH_SHORT).show()
+//        } else {
+//            textResult.value = result.contents
+//        }
+//    }
+//
     // Permission request launcher
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->

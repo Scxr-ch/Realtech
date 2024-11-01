@@ -2,6 +2,7 @@ package com.example.railtech.ui.theme
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,6 +39,10 @@ import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+object SessionState {
+    var sessionID = ""
+}
 
 @Composable
 fun NavbarComposable(onClickMap: () -> Unit, onClickGPS: () -> Unit, selectMap: Boolean, selectGPS: Boolean) {
@@ -214,6 +219,14 @@ fun AppMain(context: Context,activity: Activity) {
         )
         "checkout_screen" -> {
             // insert some logic to end location service
+            val checkInData = CheckInObject(user = "alonzo", checkIn = false, sessionID = SessionState.sessionID)
+            val scope = rememberCoroutineScope()
+            scope.launch {
+                sendCheckInData(checkInData)
+                Log.d("Debug", "Check out data sent!!!!")
+            }
+
+
             CheckoutScreen()
         }
         "gps_screen" -> {
@@ -240,13 +253,15 @@ fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context, activit
             Toast.makeText(context, "Scan canceled", Toast.LENGTH_SHORT).show()
         } else {
             textResult.value = result.contents
+            SessionState.sessionID = textResult.value
 
-            val checkInData = CheckInObject(user = "alonzo", checkIn = true, sessionID = "textResult.value")
+            val checkInData = CheckInObject(user = "alonzo", checkIn = true, sessionID = textResult.value)
 
             val scope = CoroutineScope(Dispatchers.IO)
             // Send the scan result to the server
             scope.launch {
                 sendCheckInData(checkInData)
+                Log.d("Debug","Check in data sent!!!!")
             }
             onNavigateToConfirmation()
         }

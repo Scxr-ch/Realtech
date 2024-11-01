@@ -1,6 +1,11 @@
 package com.example.railtech
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Paint
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,8 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +45,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,11 +57,41 @@ import com.example.railtech.models.AccessPoint
 import com.example.railtech.models.Circle
 import com.example.railtech.models.Coordinates
 import com.example.railtech.models.Person
+import com.example.railtech.models.WifiScanResponse
 import com.example.railtech.models.WorkzoneRectangle
+import com.example.railtech.models.flipAxes
 import com.example.railtech.ui.theme.NavbarComposable
+import com.google.gson.Gson
 
 @Composable
 fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickGPS: () -> Unit) {
+    val context = LocalContext.current
+    val receivedData = remember { mutableStateOf<WifiScanResponse?>(null) } // Store received data
+
+    // Register the BroadcastReceiver
+    val receiver = remember {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val data = intent?.getParcelableExtra<WifiScanResponse>("response_key")
+                if (data != null) {
+                    // Update your UI or state with the received data
+                    Log.d("BroadcastReceiver", "Received response: $data")
+                    receivedData.value = data.flipAxes()
+                }
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val filter = IntentFilter("com.example.UPDATE_UI")
+        context.registerReceiver(receiver, filter)
+
+        // Cleanup: Unregister the receiver when the composable leaves the composition
+        onDispose {
+            context.unregisterReceiver(receiver)
+        }
+    }
+
     Scaffold(
         bottomBar = {
             NavbarComposable(
@@ -78,35 +116,56 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                val accessPoints1 = listOf(
-                    AccessPoint("SSID_1", "BSSID_1", -50, 2400),
-                    AccessPoint("SSID_2", "BSSID_2", -70, 5200)
-                )
-
-                val accessPoints2 = listOf(
-                    AccessPoint("SSID_3", "BSSID_3", -65, 2400),
-                    AccessPoint("SSID_4", "BSSID_4", -80, 5200)
-                )
-
                 // Generate dummy Circles for current and previous coordinates
                 val circle1 = Circle(-6.0f, 19.0f, 5.0f)
                 val circle2 = Circle(1f, 15.0f, 4.0f)
 
-                // Create a list of Persons with dummy data
-                val persons = listOf(
-                    Person(circle1, circle2, "Alice", 5.0f, accessPoints1, tracking = true),
-                    Person(circle2, circle2, "Bob", 4.0f, accessPoints2, tracking = false),
-                    Person(Circle(7.0f, 10.0f, 3.0f), Circle(22.0f, 32.0f, 3.5f), "Charlie", 4.5f, accessPoints1, tracking = true),
-                    Person(Circle(1.0f, 3.0f, 2.5f), Circle(26.0f, 36.0f, 2.0f), "Dana", 3.5f, accessPoints2, tracking = false),
-                    Person(Circle(3.0f, 10.0f, 5.5f), Circle(28.0f, 38.0f, 4.5f), "Eve", 5.0f, accessPoints1, tracking = true)
-                )
+//                // Create a list of Persons with dummy data
+//                val persons = listOf(
+//                    Person(circle1, circle2, "Alice", 5.0f, accessPoints1, tracking = true),
+//                    Person(circle2, circle2, "Bob", 4.0f, accessPoints2, tracking = false),
+//                    Person(Circle(7.0f, 10.0f, 3.0f), Circle(22.0f, 32.0f, 3.5f), "Charlie", 4.5f, accessPoints1, tracking = true),
+//                    Person(Circle(1.0f, 3.0f, 2.5f), Circle(26.0f, 36.0f, 2.0f), "Dana", 3.5f, accessPoints2, tracking = false),
+//                    Person(Circle(3.0f, 10.0f, 5.5f), Circle(28.0f, 38.0f, 4.5f), "Eve", 5.0f, accessPoints1, tracking = true)
+//                )
+//
+//                val rectangles = listOf(
+//                    WorkzoneRectangle("Workzone A", rectLeftX = 5f, rectBottomY = 13f, rectWidth = 2f, rectHeight = 2f),
+//                    WorkzoneRectangle("Workzone B", rectLeftX = 2f, rectBottomY = 4f, rectWidth = 2f, rectHeight = 1f)
+//                )
 
-                val rectangles = listOf(
-                    WorkzoneRectangle("Workzone A", rectLeftX = 5f, rectBottomY = 13f, rectWidth = 2f, rectHeight = 2f),
-                    WorkzoneRectangle("Workzone B", rectLeftX = 2f, rectBottomY = 4f, rectWidth = 2f, rectHeight = 1f)
-                )
+                val persons = receivedData.value?.persons
+                val rectangles = receivedData.value?.workzones
+//                val accessPoints = receivedData.value?.accessPoints
 
-                GridCanvas(people = persons, rectangles = rectangles,)
+
+                if (persons != null && rectangles != null) {
+                    GridCanvas(people = persons, rectangles = rectangles)
+                } else {
+                    Log.d("Debug", "Received data is null NAHUFJDGHFGSJGHMGFGEJJ")
+                    val accessPoints1 = listOf(
+                        AccessPoint("SSID_1", "BSSID_1", -50, 2400),
+                        AccessPoint("SSID_2", "BSSID_2", -70, 5200)
+                    )
+
+                    val accessPoints2 = listOf(
+                        AccessPoint("SSID_3", "BSSID_3", -65, 2400),
+                        AccessPoint("SSID_4", "BSSID_4", -80, 5200)
+                    )
+
+                    val persons = listOf(
+                        Person(circle1, circle2, "Alice", 5.0f, accessPoints1, tracking = true),
+                        Person(circle2, circle2, "Bob", 4.0f, accessPoints2, tracking = false),
+                        Person(Circle(7.0f, 10.0f, 3.0f), Circle(22.0f, 32.0f, 3.5f), "Charlie", 4.5f, accessPoints1, tracking = true),
+                        Person(Circle(1.0f, 3.0f, 2.5f), Circle(26.0f, 36.0f, 2.0f), "Dana", 3.5f, accessPoints2, tracking = false),
+                        Person(Circle(3.0f, 10.0f, 5.5f), Circle(28.0f, 38.0f, 4.5f), "Eve", 5.0f, accessPoints1, tracking = true)
+                    )
+
+                    val rectangles = listOf(
+                        WorkzoneRectangle("Workzone A", rectLeftX = 5f, rectBottomY = 13f, rectWidth = 2f, rectHeight = 2f),
+                        WorkzoneRectangle("Workzone B", rectLeftX = 2f, rectBottomY = 4f, rectWidth = 2f, rectHeight = 1f)
+                    )
+                }
                 ElevatedButton(onClick = onNavigateToCheckout) {
                     Text(
                         text = "Check out",
@@ -127,10 +186,14 @@ fun GridCanvas(
     gridSize: Dp = 25.dp,
     rectangles: List<WorkzoneRectangle> = emptyList(),
     pointColor: Color = Color.Red,
+//    minX: Int = 0,
+//    maxX: Int = 25,
+//    minY: Int = -7,
+//    maxY: Int = 7,
     minX: Int = -7,
     maxX: Int = 7,
     minY: Int = 0,
-    maxY: Int = 20,
+    maxY: Int = 25,
     people: List<Person> = emptyList(),
     pointRadius: Float = 10f
 ) {

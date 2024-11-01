@@ -3,8 +3,9 @@ package com.example.railtech.network
 import com.example.railtech.models.CheckInObject
 import com.example.railtech.models.StepsInfoObject
 import com.example.railtech.models.WifiScanObject
+import com.example.railtech.models.WifiScanResponse
 
-suspend fun sendWifiScanData(wifiScanObject: WifiScanObject) {
+suspend fun sendWifiScanData(wifiScanObject: WifiScanObject) : WifiScanResponse? {
 
     // Convert the WifiScanObject to a JSON string
 //    val requestBody = Gson().toJson(wifiScanObject)
@@ -14,14 +15,15 @@ suspend fun sendWifiScanData(wifiScanObject: WifiScanObject) {
         if (response.isSuccessful) {
             println("POST request successful: ${response.code()}")
             val responseBody = response.body()
-            
+            println("Response Body: $responseBody")
+            return responseBody
         } else {
             println("Error: ${response.code()}")
         }
     } catch (e: Exception) {
         println("POST request failed: ${e.message}")
     }
-
+    return null
 }
 
 suspend fun sendCheckInData(checkInObject: CheckInObject) {

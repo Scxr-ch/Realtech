@@ -13,6 +13,7 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.app.NotificationCompat
@@ -63,7 +64,16 @@ class WifiScanService : Service() {
             }
         )
         scope.launch {
-            sendWifiScanData(thingToSend)
+            val response = sendWifiScanData(thingToSend)
+            Log.d("WifiScanService", "Response: $response")
+
+            if (response != null) {
+                // Create and send a broadcast with the response
+                val dataIntent = Intent("com.example.UPDATE_UI")
+                dataIntent.putExtra("response_key", response) // Adjust based on your response
+                sendBroadcast(dataIntent)
+                // ... write other elements of the list ...
+            }
         }
     }
 
