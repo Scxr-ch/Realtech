@@ -27,10 +27,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.util.Log
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
 
 @Composable
 fun pop_up() {
     var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Surface(
         modifier = Modifier
@@ -41,7 +49,16 @@ fun pop_up() {
             contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            Button(onClick = { showDialog = true }) {
+            Button(onClick = {
+                showDialog = true
+                Log.d("NotificationTest", "Button clicked, attempting to show notification")
+                val builder = NotificationCompat.Builder(context, "workzones_channel")
+                    .setSmallIcon(R.drawable.workzone_notice_icon)
+                    .setContentTitle("Workzones notice")
+                    .setContentText("Please return back to your dedicated workzone!")
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.notify(2, builder.build())
+            }) {
                 Text(text = "Testing")
             }
 
@@ -58,14 +75,22 @@ fun pop_up() {
 @Composable
 fun Alert_screen(
     onDismiss: () -> Unit,
-) {
+) {val context = LocalContext.current
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val notificationId = 2 // Replace with your notification's ID
+
+    // Cancel the notification
+
     AlertDialog(
         modifier = Modifier.height(400.dp),
         containerColor = Color.Red,
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(
-                onClick = onDismiss,
+                onClick = {onDismiss()
+                    notificationManager.cancel(2)
+                }
+                ,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,  // Set button background to white
                     contentColor = Color.Red       // Set button text color to red
@@ -105,7 +130,6 @@ fun Alert_screen(
         },
     )
 }
-
 @Preview
 @Composable
 fun preview() {
