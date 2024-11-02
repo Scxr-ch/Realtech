@@ -46,9 +46,15 @@ class RunningApp: Application(){
                 "running notification",
                 NotificationManager.IMPORTANCE_HIGH
             )
+            val channel2 = NotificationChannel(
+                "workzones_channel",
+                "workzones",
+                NotificationManager.IMPORTANCE_HIGH
+            )
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(channel2)
         }
     }
 }
