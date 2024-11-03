@@ -42,7 +42,7 @@ fun CheckoutScreen() {
             )
             Spacer(modifier = Modifier.padding(10.dp))
             Text(
-                text = "Check out confirmed",
+                text = "Check out confirmed",   
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(

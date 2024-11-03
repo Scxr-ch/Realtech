@@ -22,6 +22,7 @@ import androidx.core.content.PermissionChecker
 import com.example.railtech.models.AccessPoint
 import com.example.railtech.models.WifiScanObject
 import com.example.railtech.network.sendWifiScanData
+import com.google.gson.Gson
 import kotlinx.coroutines.*
 
 class WifiScanService : Service() {
@@ -64,6 +65,13 @@ class WifiScanService : Service() {
             }
         )
         scope.launch {
+//            Log.d("WifiScanService", "thingToSend: $thingToSend")
+
+            // Convert to JSON
+            val gson = Gson()
+            val jsonOutput = gson.toJson(thingToSend)
+            Log.d("WifiScanService", "Thing to send: $jsonOutput")
+
             val response = sendWifiScanData(thingToSend)
             Log.d("WifiScanService", "Response: $response")
 

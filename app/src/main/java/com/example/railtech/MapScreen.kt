@@ -57,6 +57,7 @@ import com.example.railtech.models.AccessPoint
 import com.example.railtech.models.Circle
 import com.example.railtech.models.Coordinates
 import com.example.railtech.models.Person
+import com.example.railtech.models.UserCoordinates
 import com.example.railtech.models.WifiScanResponse
 import com.example.railtech.models.WorkzoneRectangle
 import com.example.railtech.models.flipAxes
@@ -134,7 +135,8 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
 //                    WorkzoneRectangle("Workzone B", rectLeftX = 2f, rectBottomY = 4f, rectWidth = 2f, rectHeight = 1f)
 //                )
 
-                val persons = receivedData.value?.persons
+                val persons = receivedData.value?.Users
+//                val persons = receivedData.value?.persons
                 val rectangles = receivedData.value?.workzones
 //                val accessPoints = receivedData.value?.accessPoints
 
@@ -192,9 +194,9 @@ fun GridCanvas(
 //    maxY: Int = 7,
     minX: Int = -7,
     maxX: Int = 7,
-    minY: Int = 0,
-    maxY: Int = 25,
-    people: List<Person> = emptyList(),
+    minY: Int = -2,
+    maxY: Int = 20,
+    people: List<UserCoordinates> = emptyList(),
     pointRadius: Float = 10f
 ) {
 // Calculate the number of cells based on the coordinate range
@@ -327,7 +329,7 @@ fun DrawScope.drawAxesLabels(cellSize: Float, minX: Int, maxX: Int, minY: Int, m
 }
 
 fun DrawScope.drawPeoplePoints(
-    people: List<Person>,
+    people: List<UserCoordinates>,
     cellSize: Float,
     color: Color,
     radius: Float,
@@ -346,7 +348,7 @@ fun DrawScope.drawPeoplePoints(
     paint.color = android.graphics.Color.BLACK
 
     people.forEach { person ->
-        val (x, y) = person.current_coordinates
+        val (x, y) = person
 
         // Convert coordinates to canvas pixel offsets
         val pixelOffset = Offset(centerX + x * cellSize, centerY - y * cellSize)
@@ -359,12 +361,14 @@ fun DrawScope.drawPeoplePoints(
         )
 
         // Draw the label slightly offset from the point
-        drawContext.canvas.nativeCanvas.drawText(
-            person.name,
-            pixelOffset.x + radius * 2,
-            pixelOffset.y - radius * 2,
-            paint
-        )
+        person.name?.let {
+            drawContext.canvas.nativeCanvas.drawText(
+                it,
+                pixelOffset.x + radius * 2,
+                pixelOffset.y - radius * 2,
+                paint
+            )
+        }
     }
     /*
     val paint = Paint().apply {
