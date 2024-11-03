@@ -83,13 +83,20 @@ data class AccessPointLocation(
 ) : Parcelable
 
 @Parcelize
+data class InWorkzones(
+    val workzone: String,
+    val people: @RawValue List<String>
+) : Parcelable
+
+@Parcelize
 data class WifiScanResponse(
     val Users: @RawValue List<UserCoordinates> = emptyList(),
     val APs:  @RawValue List<UserCoordinates> = emptyList(),
 //    val persons: @RawValue List<Person> = emptyList(),
 //    val accessPoints:  @RawValue List<AccessPointLocation> = emptyList(),
     val workzones: @RawValue List<WorkzoneRectangle> = emptyList(),
-//    val dynamicData: @RawValue JsonObject = JsonObject(emptyMap())  // Field for unknown keys
+    val correctWorkzone: String,
+    val inWorkzones: @RawValue List<InWorkzones>
 ) : Parcelable
 
 

@@ -1,5 +1,6 @@
 package com.example.railtech
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
 import androidx.core.text.color
 import com.example.railtech.models.AccessPoint
 import com.example.railtech.models.Circle
@@ -69,6 +71,22 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
     val context = LocalContext.current
     val receivedData = remember { mutableStateOf<WifiScanResponse?>(null) } // Store received data
 
+    // inWorkzone functionality
+    var showDialog by remember { mutableStateOf(false) }
+    fun showDialog() {
+
+        showDialog = true
+        Log.d("NotificationTest", "Button clicked, attempting to show notification")
+        val builder = NotificationCompat.Builder(context, "workzones_channel")
+            .setSmallIcon(R.drawable.workzone_notice_icon)
+            .setContentTitle("Workzones notice")
+            .setContentText("Please return back to your dedicated workzone!")
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(2, builder.build())
+
+    }
+
+
     // Register the BroadcastReceiver
     val receiver = remember {
         object : BroadcastReceiver() {
@@ -78,10 +96,23 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
                     // Update your UI or state with the received data
                     Log.d("BroadcastReceiver", "Received response: $data")
                     receivedData.value = data.flipAxes()
+                    receivedData.value!!.inWorkzones.forEach { inWorkzone ->
+                        val (workzone, people) = inWorkzone
+
+                        people.forEach { person ->
+                            if (person == "alonzo") {
+                                if (workzone != receivedData.value!!.correctWorkzone) {
+                                    showDialog()
+                                }
+                            }
+                        }
+
+                    }
                 }
             }
         }
     }
+
 
     DisposableEffect(Unit) {
         val filter = IntentFilter("com.example.UPDATE_UI")
@@ -109,6 +140,14 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
                 .padding(paddingValues),
             color = MaterialTheme.colorScheme.background
         ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (showDialog) {
+                    Alert_screen(onDismiss = { showDialog = false })
+                }
+            }
 
             Column(
                 modifier = Modifier

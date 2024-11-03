@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat.getSystemService
 
+// THIS IS NOT SHOWN ANYMORE
 @Composable
 fun pop_up() {
     var showDialog by remember { mutableStateOf(false) }
@@ -84,7 +85,7 @@ fun Alert_screen(
     AlertDialog(
         modifier = Modifier.height(400.dp),
         containerColor = Color.Red,
-        onDismissRequest = onDismiss,
+        onDismissRequest = {  },
         confirmButton = {
             Button(
                 onClick = {onDismiss()
