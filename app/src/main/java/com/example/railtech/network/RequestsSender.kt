@@ -1,5 +1,6 @@
 package com.example.railtech.network
 
+import android.util.Log
 import com.example.railtech.models.CheckInObject
 import com.example.railtech.models.StepsInfoObject
 import com.example.railtech.models.WifiScanObject
@@ -19,6 +20,7 @@ suspend fun sendWifiScanData(wifiScanObject: WifiScanObject) : WifiScanResponse?
             return responseBody
         } else {
             println("Error: ${response.code()}")
+            Log.d("Response", "Error: ${response.errorBody()?.string()}")
         }
     } catch (e: Exception) {
         println("POST request failed: ${e.message}")

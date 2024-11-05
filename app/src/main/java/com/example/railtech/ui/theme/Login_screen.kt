@@ -438,7 +438,7 @@ fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context, activit
 
                 // Submit Button
                 SubmitButton {
-                    if (applicationID == "hello123" && workID == "hello123") {
+                    if (applicationID == "a" && workID == "a") {
                         onNavigateToConfirmation() // Navigate to confirmation screen
                     } else {
                         IDisError = true

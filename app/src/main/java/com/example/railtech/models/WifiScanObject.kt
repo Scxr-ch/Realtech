@@ -95,10 +95,9 @@ data class WifiScanResponse(
 //    val persons: @RawValue List<Person> = emptyList(),
 //    val accessPoints:  @RawValue List<AccessPointLocation> = emptyList(),
     val workzones: @RawValue List<WorkzoneRectangle> = emptyList(),
-    val correctWorkzone: String,
+    val correctWorkzone: List<String> = emptyList(),
     val inWorkzones: @RawValue List<InWorkzones>
 ) : Parcelable
-
 
 fun WifiScanResponse.flipAxes(): WifiScanResponse {
     // Flip persons' coordinates

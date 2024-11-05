@@ -101,7 +101,8 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
 
                         people.forEach { person ->
                             if (person == "alonzo") {
-                                if (workzone != receivedData.value!!.correctWorkzone) {
+                                if (!receivedData.value!!.correctWorkzone.any { it == workzone }) {
+
                                     showDialog()
                                 }
                             }
