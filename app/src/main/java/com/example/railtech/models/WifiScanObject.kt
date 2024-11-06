@@ -91,7 +91,7 @@ data class InWorkzones(
 @Parcelize
 data class WifiScanResponse(
     val Users: @RawValue List<UserCoordinates> = emptyList(),
-    val APs:  @RawValue List<UserCoordinates> = emptyList(),
+    // val APs:  @RawValue List<UserCoordinates> = emptyList(),
 //    val persons: @RawValue List<Person> = emptyList(),
 //    val accessPoints:  @RawValue List<AccessPointLocation> = emptyList(),
     val workzones: @RawValue List<WorkzoneRectangle> = emptyList(),
@@ -106,9 +106,9 @@ fun WifiScanResponse.flipAxes(): WifiScanResponse {
     }
 
     // Flip APs' locations and trilateration circles
-    val flippedAPs = APs.map { apLocation ->
-        apLocation.flip()
-    }
+//    val flippedAPs = APs.map { apLocation ->
+//        apLocation.flip()
+//    }
 
     // Flip workzones by swapping both position and size dimensions
     val flippedWorkzones = workzones.map { workzone ->
@@ -122,7 +122,7 @@ fun WifiScanResponse.flipAxes(): WifiScanResponse {
 
     return this.copy(
         Users = flippedUsers,
-        APs = flippedAPs,
+//        APs = flippedAPs,
 //        persons = flippedPersons,
 //        accessPoints = flippedAccessPoints,
         workzones = flippedWorkzones
