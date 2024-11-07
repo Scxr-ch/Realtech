@@ -54,7 +54,7 @@ class WifiScanService : Service() {
 
     private fun processWifiScanResults(scanResults: List<ScanResult>) {
         val thingToSend = WifiScanObject(
-            user = "alonzo",
+            user = User.name,
             accessPoints = List(scanResults.size) { index ->
                 AccessPoint(
                     bssid = scanResults[index].BSSID,

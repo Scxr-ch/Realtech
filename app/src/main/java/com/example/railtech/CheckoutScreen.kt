@@ -46,7 +46,7 @@ fun CheckoutScreen() {
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(
-                text = "You may now go to your work zone and carry out the work required.",
+                text = "You have been checked out successfully.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(10.dp).padding(50.dp, 0.dp)

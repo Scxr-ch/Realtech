@@ -100,7 +100,7 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
                         val (workzone, people) = inWorkzone
 
                         people.forEach { person ->
-                            if (person == "alonzo") {
+                            if (person == User.name) {
                                 if (!receivedData.value!!.correctWorkzone.any { it == workzone }) {
 
                                     showDialog()
@@ -225,17 +225,17 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
 @Composable
 fun GridCanvas(
 //    modifier: Modifier = Modifier,
-    gridSize: Dp = 25.dp,
+    gridSize: Dp = 15.dp,
     rectangles: List<WorkzoneRectangle> = emptyList(),
     pointColor: Color = Color.Red,
 //    minX: Int = 0,
 //    maxX: Int = 25,
 //    minY: Int = -7,
 //    maxY: Int = 7,
-    minX: Int = -7,
-    maxX: Int = 7,
+    minX: Int = -1,
+    maxX: Int = 20,
     minY: Int = -2,
-    maxY: Int = 20,
+    maxY: Int = 25,
     people: List<UserCoordinates> = emptyList(),
     pointRadius: Float = 10f
 ) {

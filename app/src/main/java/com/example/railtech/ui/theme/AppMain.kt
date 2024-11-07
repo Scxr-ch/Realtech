@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.railtech.ActualLoginScreen
 import com.example.railtech.CheckoutScreen
 import com.example.railtech.GPSScreen
 import com.example.railtech.MainActivity
@@ -32,6 +33,7 @@ import com.example.railtech.MapScreen
 //import com.example.railtech.MainActivity.checkCamPermission
 //import com.example.railtech.checkCamPermission
 import com.example.railtech.R
+import com.example.railtech.User
 import com.example.railtech.models.CheckInObject
 import com.example.railtech.network.sendCheckInData
 import com.journeyapps.barcodescanner.ScanContract
@@ -203,6 +205,12 @@ fun AppMain(context: Context,activity: Activity) {
 
     // Conditionally render screens based on the currentScreen state
     when (currentScreen) {
+        "actual_login_screen" -> ActualLoginScreen(
+            onNavigateToConfirmation = {
+                currentScreen = "login_screen"
+            },
+        )
+        // note that this is the check-in screen
         "login_screen" -> login_screen(onNavigateToConfirmation = {
             currentScreen = "confirmation_screen"
         }, context = context, activity)
@@ -219,7 +227,7 @@ fun AppMain(context: Context,activity: Activity) {
         )
         "checkout_screen" -> {
             // insert some logic to end location service
-            val checkInData = CheckInObject(user = "alonzo", checkIn = false, sessionID = SessionState.sessionID)
+            val checkInData = CheckInObject(user = User.name, checkIn = false, sessionID = SessionState.sessionID)
             val scope = rememberCoroutineScope()
             scope.launch {
                 sendCheckInData(checkInData)
@@ -235,6 +243,7 @@ fun AppMain(context: Context,activity: Activity) {
                 onClickGPS = {}
             )
         }
+
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -255,7 +264,7 @@ fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context, activit
             textResult.value = result.contents
             SessionState.sessionID = textResult.value
 
-            val checkInData = CheckInObject(user = "alonzo", checkIn = true, sessionID = textResult.value)
+            val checkInData = CheckInObject(user = User.name, checkIn = true, sessionID = textResult.value)
 
             val scope = CoroutineScope(Dispatchers.IO)
             // Send the scan result to the server
@@ -331,13 +340,13 @@ fun login_screen(onNavigateToConfirmation: () -> Unit, context: Context, activit
                             modifier = Modifier.padding(16.dp)
                         )
                     },
-                    actions = {
-                        Image(
-                            painter = painterResource(id = R.drawable.map),
-                            contentDescription = null,
-                            modifier = Modifier.size(50.dp)
-                        )
-                    },
+//                    actions = {
+//                        Image(
+//                            painter = painterResource(id = R.drawable.map),
+//                            contentDescription = null,
+//                            modifier = Modifier.size(50.dp)
+//                        )
+//                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         titleContentColor = MaterialTheme.colorScheme.primary,
