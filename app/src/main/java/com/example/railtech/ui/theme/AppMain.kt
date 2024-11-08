@@ -201,7 +201,7 @@ fun Orbar() {
 }
 @Composable
 fun AppMain(context: Context,activity: Activity) {
-    var currentScreen by rememberSaveable { mutableStateOf("login_screen") }
+    var currentScreen by rememberSaveable { mutableStateOf("actual_login_screen") }
 
     // Conditionally render screens based on the currentScreen state
     when (currentScreen) {
@@ -212,7 +212,9 @@ fun AppMain(context: Context,activity: Activity) {
         )
         // note that this is the check-in screen
         "login_screen" -> login_screen(onNavigateToConfirmation = {
-            currentScreen = "confirmation_screen"
+//            currentScreen = "confirmation_screen"
+            currentScreen = "checkout_screen"
+
         }, context = context, activity)
         "confirmation_screen" -> ConfirmationPage(onNavigateToLogin = {
             // insert some logic to start location service

@@ -225,17 +225,17 @@ fun MapScreen(onNavigateToCheckout: () -> Unit, onClickMap: () -> Unit, onClickG
 @Composable
 fun GridCanvas(
 //    modifier: Modifier = Modifier,
-    gridSize: Dp = 15.dp,
+    gridSize: Dp = 11.dp,
     rectangles: List<WorkzoneRectangle> = emptyList(),
     pointColor: Color = Color.Red,
 //    minX: Int = 0,
 //    maxX: Int = 25,
 //    minY: Int = -7,
 //    maxY: Int = 7,
-    minX: Int = -1,
-    maxX: Int = 20,
-    minY: Int = -2,
-    maxY: Int = 25,
+    minX: Int = -15,
+    maxX: Int = 15,
+    minY: Int = -5,
+    maxY: Int = 35,
     people: List<UserCoordinates> = emptyList(),
     pointRadius: Float = 10f
 ) {
@@ -308,7 +308,6 @@ fun DrawScope.drawRectangles(
         )
     }
 }
-
 
 fun DrawScope.drawGraphGrid(
     cellSize: Float,

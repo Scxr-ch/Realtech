@@ -61,7 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 object User {
-    var name: String = ""
+    var name by mutableStateOf("")
 }
 
 
