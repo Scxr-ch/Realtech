@@ -212,8 +212,8 @@ fun AppMain(context: Context,activity: Activity) {
         )
         // note that this is the check-in screen
         "login_screen" -> login_screen(onNavigateToConfirmation = {
-//            currentScreen = "confirmation_screen"
-            currentScreen = "checkout_screen"
+            currentScreen = "confirmation_screen"
+//            currentScreen = "checkout_screen"
 
         }, context = context, activity)
         "confirmation_screen" -> ConfirmationPage(onNavigateToLogin = {
