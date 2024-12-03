@@ -1,6 +1,8 @@
 # Android app prototype for the Railtech Open innovation challenge
 
-## Features of our app
+More information about the app and the general solution is linked here: https://github.com/AloneTotally/Railtech-server
+
+## Features of the app
 ### Sending requests
 - Scanning of Wi-fi Access points in the area using WifiManager
 - Sending all of that data to a server
